@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Nutricional con IA</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Archivo CSS externo -->
+</head>
+<body>
+    <h1>Asistente Nutricional con Google Gemini</h1>
+    <form id="nutritionForm">
+        <label for="deporte">Deporte:</label>
+        <input type="text" id="deporte" placeholder="Ejemplo: correr" required><br><br>
+
+        <label for="edad">Edad:</label>
+        <input type="number" id="edad" placeholder="Ejemplo: 25" required><br><br>
+
+        <label for="peso">Peso (kg):</label>
+        <input type="number" id="peso" placeholder="Ejemplo: 70" required><br><br>
+
+        <label for="objetivo">Objetivo:</label>
+        <input type="text" id="objetivo" placeholder="Ejemplo: ganar masa muscular" required><br><br>
+
+        <button type="button" id="generateButton">Generar Plan Nutricional</button>
+    </form>
+
+    <h2>Plan Nutricional Generado:</h2>
+    <div id="responseContainer"></div> <!-- Contenedor para mostrar el plan nutricional -->
+
+    <script type="importmap">
+        {
+          "imports": {
+            "@google/genai": "https://esm.run/@google/genai"
+          }
+        }
+    </script>
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
+
+        // Reemplaza 'YOUR_API_KEY' con tu clave de API real
+        const ai = new GoogleGenAI({ apiKey: "YOUR_API_KEY" });
+
+        document.getElementById('generateButton').addEventListener('click', async () => {
+            const deporte = document.getElementById('deporte').value;
+            const edad = document.getElementById('edad').value;
+            const peso = document.getElementById('peso').value;
+            const objetivo = document.getElementById('objetivo').value;
+
+            if (!deporte || !edad || !peso || !objetivo) {
+                alert('Por favor, completa todos los campos.');
+                return;
+            }
+
+            const prompt = `Eres un nutricionista profesional para gente de la zona Mediterranea. Proporciona un plan nutricional semanal para un deportista con los siguientes datos:
+            Deporte: ${deporte}
+            Edad: ${edad} años
+            Peso: ${peso} kg
+            Objetivo: ${objetivo}
+            Incluye desayuno, almuerzo, comida, merienda y cena para cada día de la semana.`;
+
+            const responseContainer = document.getElementById('responseContainer');
+            responseContainer.innerHTML = '<p>Cargando...</p>'; // Mostrar mensaje de carga
+
+            try {
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.0-flash",
+                    contents: prompt,
+                });
+
+                // Mostrar el texto generado con formato adecuado
+                const planNutricional = response.text;
+                console.log(planNutricional); // Verificar el formato de la respuesta
+                responseContainer.innerHTML = `<pre>${planNutricional}</pre>`;
+            } catch (error) {
+                console.error('Error al generar contenido:', error);
+                responseContainer.innerHTML = '<p>Ocurrió un error al generar el contenido. Revisa la consola para más detalles.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
